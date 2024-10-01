@@ -98,25 +98,28 @@ try:
                 
     elif choice == "SharePoint":
         st.subheader("SharePoint")
-        shareWith = st.text_input("Username Of Sharer")
-        if shareWith:
-            if functions.exist(shareWith):
-                uploaded_files = os.listdir(UPLOAD_DIR + "/" +  st.session_state['logged_in_user_id'])
-                
-                if uploaded_files:
-                    for file in uploaded_files:
-                        file_path = os.path.join(UPLOAD_DIR, st.session_state['logged_in_user_id'], file)
+        if 'logged_in_user_id' not in st.session_state:
+                st.error("You need to log in first!")
+        else:
+            shareWith = st.text_input("Username Of Sharer")
+            if shareWith:
+                if functions.exist(shareWith):
+                    uploaded_files = os.listdir(UPLOAD_DIR + "/" +  st.session_state['logged_in_user_id'])
+                    
+                    if uploaded_files:
+                        for file in uploaded_files:
+                            file_path = os.path.join(UPLOAD_DIR, st.session_state['logged_in_user_id'], file)
 
-                        # Read the file content in binary mode
-                        with open(file_path, "rb") as f:
-                            file_content = f.read()
-                        
-                        # Display the file and a "Share?" button
-                        if st.button(file + " " + "**Share?**", key=file):
-                            # Call the add function with both file name and content
-                            functions.add(f"Shared From {st.session_state['logged_in_user_id']}"+file , file_content, shareWith)
-                            st.success(f"Shared {file} with {shareWith}")
-            else:
-                st.warning("User does not exist!")
+                            # Read the file content in binary mode
+                            with open(file_path, "rb") as f:
+                                file_content = f.read()
+                            
+                            # Display the file and a "Share?" button
+                            if st.button(file + " " + "**Share?**", key=file):
+                                # Call the add function with both file name and content
+                                functions.add(f"Shared From {st.session_state['logged_in_user_id']}"+file , file_content, shareWith)
+                                st.success(f"Shared {file} with {shareWith}")
+                else:
+                    st.warning("User does not exist!")
 except:
     pass
