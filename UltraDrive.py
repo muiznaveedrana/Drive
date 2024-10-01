@@ -20,101 +20,103 @@ st.set_page_config("UltraDrive",
 
 UPLOAD_DIR = "uploads"
 st.title("⚡UltraDrive!⚡", help="NOT RELATED TO ULTRAMAX")
-
-choices = ["Login", "Sign Up", "Drive", "SharePoint"]
-choice = st.sidebar.radio("Menu", choices)
-if choice == "Drive":
-    if 'logged_in_user_id' not in st.session_state:
-            st.error("You need to log in first!")
-    else:
-        # Set up a directory for uploaded files
-        if not os.path.exists(UPLOAD_DIR):
-            os.makedirs(UPLOAD_DIR)
-
-        # Helper function to savaded files
-        def save_uploaded_file(uploaded_file):
-            file_path = os.path.join(UPLOAD_DIR,st.session_state['logged_in_user_id'],uploaded_file.name)
-            with open(file_path, "wb") as f:
-                f.write(uploaded_file.getbuffer())
-            return file_path
-            
-
-        # Streamlit interface
-        st.subheader("Drive")
-         # File uploader widget
-        uploaded_file = st.file_uploader("Upload your files", type=None, help="Zipped Folders Allowed")
-
-        if uploaded_file is not None:
-            file_path = save_uploaded_file(uploaded_file)
-            #st.rerun()
-            #st.success(f"File {uploaded_file.name} uploaded successfully!")
-            
-        # List all uploaded files
-        st.subheader("Uploaded Files")
-        uploaded_files = os.listdir(UPLOAD_DIR + "/" +  st.session_state['logged_in_user_id'])
-        #st.write(uploaded_files)
-        if uploaded_files:
-            for file in uploaded_files:
-                with st.expander(f"**{file}**"):
-                    file_path = os.path.join(UPLOAD_DIR,st.session_state['logged_in_user_id'],file)
-                    #st.write(file_path)
-
-                    with open(file_path, "rb") as f:
-                        file_content = f.read()
-                    #st.write(file_path)
-                    download = st.download_button("Download", file_content, file_path[7:], key=file)
-                    if st.button("**PERMENANT** Delete", key=f"Hello{file}"):
-                        os.remove(file_path)
-                        
-                        st.rerun()
+try:
+    choices = ["Login", "Sign Up", "Drive", "SharePoint"]
+    choice = st.sidebar.radio("Menu", choices)
+    if choice == "Drive":
+        if 'logged_in_user_id' not in st.session_state:
+                st.error("You need to log in first!")
         else:
-            st.write("**No files uploaded yet.**")
+            # Set up a directory for uploaded files
+            if not os.path.exists(UPLOAD_DIR):
+                os.makedirs(UPLOAD_DIR)
 
-elif choice == "Login":
-    st.subheader("Login")
-    #logged_in_user = None
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    #remember_me = st.checkbox("Remember Me")
-    if st.button("Login"):
-        logged_in_user = functions.login(username, password)
-        
-        if logged_in_user:
+            # Helper function to savaded files
+            def save_uploaded_file(uploaded_file):
+                file_path = os.path.join(UPLOAD_DIR,st.session_state['logged_in_user_id'],uploaded_file.name)
+                with open(file_path, "wb") as f:
+                    f.write(uploaded_file.getbuffer())
+                return file_path
+                
 
-            st.sidebar.info(f"Logged in as {username}")
-    
-elif choice == "Sign Up":
-    st.subheader("Create Account")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
-    #user_id = st.text_input("Unique ID")
-    if st.button("Sign Up"):
-        if functions.verify_signup(username, password):
-            functions.sign_up(username, password)
-            logged_in_user = functions.login(username, password)
-            st.session_state['logged_in_user_id'] = logged_in_user[0]
-            #st.sidebar.info(f"Logged in as {functions.get_username(st.session_state['logged_in_user_id'])}")
-            os.makedirs(f"uploads/{username}")
-            
-elif choice == "SharePoint":
-    st.subheader("SharePoint")
-    shareWith = st.text_input("Username Of Sharer")
-    if shareWith:
-        if functions.exist(shareWith):
+            # Streamlit interface
+            st.subheader("Drive")
+            # File uploader widget
+            uploaded_file = st.file_uploader("Upload your files", type=None, help="Zipped Folders Allowed")
+
+            if uploaded_file is not None:
+                file_path = save_uploaded_file(uploaded_file)
+                #st.rerun()
+                #st.success(f"File {uploaded_file.name} uploaded successfully!")
+                
+            # List all uploaded files
+            st.subheader("Uploaded Files")
             uploaded_files = os.listdir(UPLOAD_DIR + "/" +  st.session_state['logged_in_user_id'])
-            
+            #st.write(uploaded_files)
             if uploaded_files:
                 for file in uploaded_files:
-                    file_path = os.path.join(UPLOAD_DIR, st.session_state['logged_in_user_id'], file)
+                    with st.expander(f"**{file}**"):
+                        file_path = os.path.join(UPLOAD_DIR,st.session_state['logged_in_user_id'],file)
+                        #st.write(file_path)
 
-                    # Read the file content in binary mode
-                    with open(file_path, "rb") as f:
-                        file_content = f.read()
-                    
-                    # Display the file and a "Share?" button
-                    if st.button(file + " " + "**Share?**", key=file):
-                        # Call the add function with both file name and content
-                        functions.add(f"Shared From {st.session_state['logged_in_user_id']}"+file , file_content, shareWith)
-                        st.success(f"Shared {file} with {shareWith}")
-        else:
-            st.warning("User does not exist!")
+                        with open(file_path, "rb") as f:
+                            file_content = f.read()
+                        #st.write(file_path)
+                        download = st.download_button("Download", file_content, file_path[7:], key=file)
+                        if st.button("**PERMENANT** Delete", key=f"Hello{file}"):
+                            os.remove(file_path)
+                            
+                            st.rerun()
+            else:
+                st.write("**No files uploaded yet.**")
+
+    elif choice == "Login":
+        st.subheader("Login")
+        #logged_in_user = None
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        #remember_me = st.checkbox("Remember Me")
+        if st.button("Login"):
+            logged_in_user = functions.login(username, password)
+            
+            if logged_in_user:
+
+                st.sidebar.info(f"Logged in as {username}")
+        
+    elif choice == "Sign Up":
+        st.subheader("Create Account")
+        username = st.text_input("Username")
+        password = st.text_input("Password", type="password")
+        #user_id = st.text_input("Unique ID")
+        if st.button("Sign Up"):
+            if functions.verify_signup(username, password):
+                functions.sign_up(username, password)
+                logged_in_user = functions.login(username, password)
+                st.session_state['logged_in_user_id'] = logged_in_user[0]
+                #st.sidebar.info(f"Logged in as {functions.get_username(st.session_state['logged_in_user_id'])}")
+                os.makedirs(f"uploads/{username}")
+                
+    elif choice == "SharePoint":
+        st.subheader("SharePoint")
+        shareWith = st.text_input("Username Of Sharer")
+        if shareWith:
+            if functions.exist(shareWith):
+                uploaded_files = os.listdir(UPLOAD_DIR + "/" +  st.session_state['logged_in_user_id'])
+                
+                if uploaded_files:
+                    for file in uploaded_files:
+                        file_path = os.path.join(UPLOAD_DIR, st.session_state['logged_in_user_id'], file)
+
+                        # Read the file content in binary mode
+                        with open(file_path, "rb") as f:
+                            file_content = f.read()
+                        
+                        # Display the file and a "Share?" button
+                        if st.button(file + " " + "**Share?**", key=file):
+                            # Call the add function with both file name and content
+                            functions.add(f"Shared From {st.session_state['logged_in_user_id']}"+file , file_content, shareWith)
+                            st.success(f"Shared {file} with {shareWith}")
+            else:
+                st.warning("User does not exist!")
+except:
+    pass
